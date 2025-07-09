@@ -29,10 +29,17 @@
    git clone https://github.com/yourusername/task-manager.git
    cd task-manager
 
-2. Установите виртуальное окружение
-3. С активированным виртуальным окружением установим необходимые пакеты:
+2. Установите и активуруйте виртуальное окружение:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/MacOS
+   venv\Scripts\activate     # Windows
+4. С активированным виртуальным окружением установим необходимые пакеты:
    ```bash
    pip install flask flask_sqlalchemy
-4. В терминале, находясь в корневой директории проекта, запустите приложение:
+5. В терминале, находясь в корневой директории проекта, запустите приложение:
    ```bash
-   python app.py 
+   python app.py
+6. Сервер будет запущен по порту:
+   ```bash
+   http://localhost:5000
