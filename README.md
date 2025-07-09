@@ -1,7 +1,5 @@
 # Task Manager - Flask приложение для управления задачами
 
-![Task Manager Preview](https://via.placeholder.com/800x400?text=Task+Manager+Screenshot)
-
 Простое и удобное веб-приложение для управления задачами с дедлайнами, приоритетами и категориями, построенное на Flask.
 
 ## Основные возможности
@@ -30,3 +28,11 @@
    ```bash
    git clone https://github.com/yourusername/task-manager.git
    cd task-manager
+
+2. Установите виртуальное окружение
+3. С активированным виртуальным окружением установим необходимые пакеты:
+   ```bash
+   pip install flask flask_sqlalchemy
+4. В терминале, находясь в корневой директории проекта, запустите приложение:
+   ```bash
+   python app.py 
