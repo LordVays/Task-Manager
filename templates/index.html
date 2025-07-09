@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+</head>
+<body>
+
+    <div class="container">
+        <aside class="sidebar-left">
+            <h2>О приложении</h2>
+            <p>Управляйте своими задачами эффективно. Добавляйте, редактируйте и отслеживайте дедлайны.</p>
+        </aside>
+
+        <main class="content">
+            <div class="main-content" data-aos="fade-up">
+                <header class="main-header">
+                    <h1>Task Manager</h1>
+                </header>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="/add" method="POST" class="task-form" data-aos="fade-up">
+                    <input type="text" name="content" placeholder="Добавить новую задачу..." required>
+                    <div class="form-row">
+                        <input type="date" name="date" title="Дата дедлайна">
+                        <input type="time" name="time" title="Время дедлайна">
+                    </div>
+                    <div class="form-row">
+                        <input type="text" name="category" placeholder="Категория (напр. Работа)">
+                        <select name="priority">
+                            <option value="high">Высокий приоритет</option>
+                            <option value="medium" selected>Средний приоритет</option>
+                            <option value="low">Низкий приоритет</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="add-btn">Добавить задачу</button>
+                </form>
+
+                <form method="GET" action="{{ url_for('index') }}" class="controls-form" data-aos="fade-up">
+                    <input type="hidden" name="filter" value="{{ current_filter }}">
+                    <div class="search-sort-container">
+                        <input type="search" name="q" placeholder="Поиск по задачам..." value="{{ search_query or '' }}" class="search-input">
+                        <select name="sort_by" style="background-color: #333; color: #e0e0e0;">
+                            <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>Сорт. по дедлайну</option>
+                            <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Сорт. по дате создания</option>
+                            <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Сорт. по приоритету</option>
+                        </select>
+                        <select name="sort_order" style="background-color: #333; color: #e0e0e0;">
+                            <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>По возрастанию</option>
+                            <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>По убыванию</option>
+                        </select>
+                        <button type="submit" class="filter-btn search-btn">Применить</button>
+                    </div>
+                </form>
+
+                <div class="filters" data-aos="fade-up">
+                    <a href="{{ url_for('index', filter='all', q=search_query, sort_by=sort_by, sort_order=sort_order) }}" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">Все</a>
+                    <a href="{{ url_for('index', filter='completed', q=search_query, sort_by=sort_by, sort_order=sort_order) }}" class="filter-btn {% if current_filter == 'completed' %}active{% endif %}">Выполненные</a>
+                    <a href="{{ url_for('index', filter='pending', q=search_query, sort_by=sort_by, sort_order=sort_order) }}" class="filter-btn {% if current_filter == 'pending' %}active{% endif %}">Невыполненные</a>
+                </div>
+
+                <ul class="task-list">
+                    {% if not tasks %}
+                        <li class="no-tasks" data-aos="fade-up">Задач пока нет или по вашему запросу ничего не найдено.</li>
+                    {% endif %}
+                    {% for task in tasks %}
+                    <li class="{% if task.completed %}completed{% endif %} priority-{{ task.priority }}" data-aos="fade-up">
+                        <a href="{{ url_for('complete_task', id=task.id) }}" class="complete-checkbox">
+                            {% if task.completed %}<span class="checkmark">✓</span>{% endif %}
+                        </a>
+                        <div class="task-details">
+                            <span class="task-content" data-task-id="{{ task.id }}" title="Нажмите, чтобы редактировать">{{ task.content }}</span>
+
+                            {% if task.category %}
+                                <span class="category-badge">{{ task.category }}</span>
+                            {% endif %}
+
+                            {% if task.deadline and not task.completed %}
+                            <span class="deadline">
+                                <span class="deadline-icon">⏰</span>
+                                Дедлайн: {{ task.deadline.strftime('%d.%m.%Y %H:%M') }}
+                                <span class="timer" data-deadline="{{ task.deadline.isoformat() }}"></span>
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="actions">
+                            <a href="{{ url_for('update_task', id=task.id) }}" class="action-btn edit-btn">Редактировать</a>
+                            <a href="{{ url_for('delete_task', id=task.id) }}" class="action-btn delete-btn">Удалить</a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </main>
+
+        <aside class="sidebar-right">
+            <h2>Быстрые ссылки</h2>
+            <ul>
+                <li><a href="#">Настройки</a></li>
+                <li><a href="#">Помощь</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+            <div class="theme-switcher-container">
+                <button id="theme-toggle" class="theme-toggle-btn">Сменить тему</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        (function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const currentTheme = localStorage.getItem('theme');
+
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                let theme = 'light';
+                if (document.body.classList.contains('dark-theme')) {
+                    theme = 'dark';
+                }
+                localStorage.setItem('theme', theme);
+            });
+        })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mo-js/0.288.0/mo.min.js"></script>
+    <script src="{{ url_for('static', filename='timer.js') }}"></script>
+
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+    </script>
+
+</body>
+</html>

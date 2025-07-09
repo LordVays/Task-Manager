@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обновить задачу</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="update-container">
+        <h1>Обновить задачу</h1>
+
+        <form action="{{ url_for('update_task', id=task.id) }}" method="POST" class="task-form update-form">
+            <input type="text" name="content" value="{{ task.content }}" required>
+
+            <div class="form-row">
+                 <input type="date" name="date" value="{{ task.deadline.strftime('%Y-%m-%d') if task.deadline else '' }}">
+                 <input type="time" name="time" value="{{ task.deadline.strftime('%H:%M') if task.deadline else '' }}">
+            </div>
+
+            <div class="form-row">
+                 <input type="text" name="category" value="{{ task.category or '' }}" placeholder="Категория">
+                 <select name="priority">
+                    <option value="high" {% if task.priority == 'high' %}selected{% endif %}>Высокий приоритет</option>
+                    <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Средний приоритет</option>
+                    <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Низкий приоритет</option>
+                </select>
+            </div>
+
+            <button type="submit" class="add-btn">Обновить</button>
+        </form>
+
+        <a href="{{ url_for('index') }}" class="back-link">Вернуться к списку задач</a>
+    </div>
+
+    <script>
+      (function() {
+          const currentTheme = localStorage.getItem('theme');
+          if (currentTheme === 'dark') {
+              document.body.classList.add('dark-theme');
+          }
+      })();
+    </script>
+
+</body>
+</html>
